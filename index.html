@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>終極 AI 內容自動化：反思式 AI 流程</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals with Tech Blue Accent -->
+    <!-- Application Structure Plan: A top-down narrative SPA. Starts with a hook (Hero), explains the 'Why' (Benefits), shows the 'How' (Interactive Process Flow), details the 'What For' (Use Cases), clarifies doubts (FAQ), and ends with a 'Now What' (CTA). This structure guides the user logically from problem to solution, making a complex topic digestible. The interactive process flow is the centerpiece, turning a linear list into an explorable diagram, which is more engaging and improves comprehension. -->
+    <!-- Visualization & Content Choices: Report Info (Core Workflow) -> Goal (Explain Steps) -> Viz/Method (Interactive HTML/JS Stepper + Chart.js Doughnut Chart) -> Interaction (Clicking a step highlights it, updates content below, and highlights the corresponding chart segment) -> Justification (Visually breaks down the process, making it less intimidating and reinforcing the relationship between steps) -> Library (Chart.js for visualization, custom JS for interactivity). Report Info (Use Cases) -> Goal (Show versatility) -> Viz/Method (HTML/JS Tabs) -> Interaction (Click to switch content) -> Justification (Saves space and organizes diverse examples cleanly). NO SVG/Mermaid used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #F8F9FA;
+            color: #343A40;
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #007BFF;
+            border-bottom-color: #007BFF;
+        }
+        .card {
+            background-color: #FFFFFF;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .btn-primary {
+            background-color: #007BFF;
+            color: #FFFFFF;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 4px;
+            background-color: #007BFF;
+            margin: 8px auto 0;
+            border-radius: 2px;
+        }
+        .step {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-color: #DEE2E6;
+        }
+        .step.active {
+            border-color: #007BFF;
+            background-color: #E7F3FF;
+            transform: scale(1.05);
+        }
+        .step.active .step-circle {
+            background-color: #007BFF;
+            color: #FFFFFF;
+        }
+        .step-line {
+            height: 2px;
+            background-color: #DEE2E6;
+        }
+        .faq-item {
+            border-bottom: 1px solid #DEE2E6;
+        }
+        .faq-question {
+            cursor: pointer;
+        }
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 350px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 leading-relaxed">
+
+    <!-- Navigation -->
+    <nav id="navbar" class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <div class="container mx-auto px-6 py-3">
+            <div class="flex justify-between items-center">
+                <a href="#" class="text-xl font-bold text-gray-800">AI 反思流程</a>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#intro" class="nav-link pb-1">介紹</a>
+                    <a href="#process" class="nav-link pb-1">核心流程</a>
+                    <a href="#applications" class="nav-link pb-1">應用情境</a>
+                    <a href="#faq" class="nav-link pb-1">常見問題</a>
+                    <a href="#cta" class="nav-link pb-1">立即行動</a>
+                </div>
+                <button id="mobile-menu-button" class="md:hidden p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pt-2 pb-4 border-t border-gray-200">
+            <a href="#intro" class="block py-2 text-gray-700 hover:text-blue-500">介紹</a>
+            <a href="#process" class="block py-2 text-gray-700 hover:text-blue-500">核心流程</a>
+            <a href="#applications" class="block py-2 text-gray-700 hover:text-blue-500">應用情境</a>
+            <a href="#faq" class="block py-2 text-gray-700 hover:text-blue-500">常見問題</a>
+            <a href="#cta" class="block py-2 text-gray-700 hover:text-blue-500">立即行動</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <header class="bg-white py-20 sm:py-24 lg:py-32">
+            <div class="container mx-auto px-6 text-center">
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
+                    別讓你的 AI 只是個<span class="text-blue-600">打字機</span>！
+                </h1>
+                <p class="mt-4 text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
+                    學會「AI 自我反思」，讓 ChatGPT 產出品質直接飆升，告別內容修修改改的惡夢！
+                </p>
+                <div class="mt-8">
+                    <a href="#process" class="btn-primary rounded-full px-8 py-3 font-bold text-lg inline-block">探索反思流程</a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Intro Section -->
+        <section id="intro" class="py-16 sm:py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold section-title">為什麼需要「會思考」的 AI？</h2>
+                    <p class="mt-4 text-gray-600 max-w-2xl mx-auto">本節將闡述此流程的核心價值、效益，以及它能為哪些專業人士帶來革命性的效率提升。</p>
+                </div>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="card p-8 text-center">
+                        <div class="text-4xl text-blue-500 mb-4">💡</div>
+                        <h3 class="text-xl font-bold mb-2">這是什麼？</h3>
+                        <p class="text-gray-600">一個讓 AI 學會自我審查與優化的自動化流程。從 RSS 內容擷取到腳本生成，導入關鍵的 AI 反思三步驟，實現真正的「全自動、高品質、低人工干預」內容產製。</p>
+                    </div>
+                    <div class="card p-8 text-center">
+                        <div class="text-4xl text-blue-500 mb-4">🚀</div>
+                        <h3 class="text-xl font-bold mb-2">學完能做什麼？</h3>
+                        <p class="text-gray-600">大幅提升 AI 產出內容的品質與穩定性，解決 AI 生成內容平庸或不精準的問題。您將能建立可複用於各種內容處理的可複用內容產線，提升整體效率。</p>
+                    </div>
+                    <div class="card p-8 text-center">
+                        <div class="text-4xl text-blue-500 mb-4">👥</div>
+                        <h3 class="text-xl font-bold mb-2">誰適合看？</h3>
+                        <p class="text-gray-600">所有渴望將 AI 應用推向更高層次的專業人士，特別是內容團隊、行銷人員、創作者，以及任何期望建立智能自動化內容管線的同仁。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Process Section -->
+        <section id="process" class="py-16 sm:py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold section-title">反思式 AI 流程拆解</h2>
+                    <p class="mt-4 text-gray-600 max-w-2xl mx-auto">這不僅是一條生產線，更是一個學習迴圈。點擊下方步驟，探索 AI 如何從接收任務到完成自我優化的完整旅程。</p>
+                </div>
+                
+                <div class="lg:flex lg:items-center lg:gap-12">
+                    <!-- Stepper -->
+                    <div class="flex-1">
+                        <div id="stepper" class="flex items-center justify-between relative mb-8">
+                            <div class="step flex-1 text-center" data-step="1">
+                                <div class="step-circle w-10 h-10 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-bold text-lg mx-auto mb-2">1</div>
+                                <p class="text-sm font-semibold">內容獲取</p>
+                            </div>
+                            <div class="step-line flex-auto"></div>
+                            <div class="step flex-1 text-center" data-step="2">
+                                <div class="step-circle w-10 h-10 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-bold text-lg mx-auto mb-2">2</div>
+                                <p class="text-sm font-semibold">資料抓取</p>
+                            </div>
+                            <div class="step-line flex-auto"></div>
+                            <div class="step flex-1 text-center" data-step="3">
+                                <div class="step-circle w-10 h-10 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-bold text-lg mx-auto mb-2">3</div>
+                                <p class="text-sm font-semibold">AI 反思</p>
+                            </div>
+                            <div class="step-line flex-auto"></div>
+                            <div class="step flex-1 text-center" data-step="4">
+                                <div class="step-circle w-10 h-10 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-bold text-lg mx-auto mb-2">4</div>
+                                <p class="text-sm font-semibold">自動歸檔</p>
+                            </div>
+                        </div>
+
+                        <div id="step-content" class="card p-8 min-h-[200px]">
+                            <!-- Content will be injected by JS -->
+                        </div>
+                    </div>
+                    <!-- Chart -->
+                    <div class="flex-shrink-0 w-full lg:w-1/3 mt-12 lg:mt-0">
+                         <div class="chart-container">
+                            <canvas id="processChart"></canvas>
+                        </div>
+                        <p class="text-center text-gray-600 mt-4">流程各階段佔比</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Applications Section -->
+        <section id="applications" class="py-16 sm:py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold section-title">多元的實際應用情境</h2>
+                    <p class="mt-4 text-gray-600 max-w-2xl mx-auto">這套反思流程不僅限於影片腳本，它的核心邏輯能彈性應用於各種內容創作與溝通任務，大幅提升品質與效率。</p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="card p-6">
+                        <h3 class="font-bold text-lg mb-2">📢 社群內容自動更新</h3>
+                        <p class="text-gray-600 text-sm">自動抓取最新行業新聞，生成社群貼文腳本，並經 AI 自我審查後發布。</p>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="font-bold text-lg mb-2">📚 內部知識庫文章撰寫</h3>
+                        <p class="text-gray-600 text-sm">將會議記錄、技術文件自動轉換為清晰的知識庫文章，並進行優化。</p>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="font-bold text-lg mb-2">📈 新聞摘要/市場分析</h3>
+                        <p class="text-gray-600 text-sm">定期從特定網站抓取資訊，自動生成帶有反思優化的市場摘要或分析腳本。</p>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="font-bold text-lg mb-2">🎙️ 多媒體內容擴展</h3>
+                        <p class="text-gray-600 text-sm">將現有文章自動改寫為影片腳本或 podcast 稿，並透過 AI 反思確保品質。</p>
+                    </div>
+                     <div class="card p-6">
+                        <h3 class="font-bold text-lg mb-2">💬 客戶溝通內容優化</h3>
+                        <p class="text-gray-600 text-sm">自動生成常見問題回覆、促銷文案，並由 AI 進行潤飾與校對。</p>
+                    </div>
+                    <div class="card p-6 bg-blue-50 border-2 border-blue-200">
+                        <h3 class="font-bold text-lg mb-2">... 以及更多可能！</h3>
+                        <p class="text-gray-600 text-sm">任何需要 AI 生成高品質內容的場景，都能導入此流程。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section id="faq" class="py-16 sm:py-20 bg-white">
+            <div class="container mx-auto px-6 max-w-4xl">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold section-title">常見問題</h2>
+                    <p class="mt-4 text-gray-600 max-w-2xl mx-auto">我們整理了一些您可能會有的疑問，希望能幫助您更好地理解這個強大的自動化流程。</p>
+                </div>
+                <div id="faq-container">
+                    <!-- FAQ items will be injected by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section id="cta" class="py-16 sm:py-20 bg-blue-600 text-white">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-3xl font-bold">厭倦了 AI 生成內容的不夠力？</h2>
+                <p class="mt-4 text-blue-100 max-w-2xl mx-auto">想讓你的 AI 不只產出，還能「思考」、「優化」嗎？立即解鎖 AI 自我反思的超能力，打造真正高品質、自動化的內容產線！</p>
+                <div class="mt-8">
+                     <a href="https://www.youtube.com" target="_blank" class="bg-white text-blue-600 font-bold rounded-full px-8 py-3 text-lg inline-block transition duration-300 hover:bg-gray-100 hover:scale-105">
+                        觀看教學影片
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-6 text-center text-gray-400">
+            <p>&copy; 2024 AIWize 流程展示. All Rights Reserved.</p>
+            <p class="text-sm mt-2">此頁面為概念展示，基於影片腳本大綱建構。</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile Menu
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            // Smooth Scrolling & Active Nav Link
+            const navLinks = document.querySelectorAll('.nav-link, #mobile-menu a');
+            const sections = document.querySelectorAll('section, header');
+
+            function changeNav() {
+                let index = sections.length;
+                while(--index && window.scrollY + 100 < sections[index].offsetTop) {}
+                
+                navLinks.forEach((link) => link.classList.remove('active'));
+                const activeLink = document.querySelector(`.nav-link[href="#${sections[index].id}"], #mobile-menu a[href="#${sections[index].id}"]`);
+                if (activeLink) {
+                    activeLink.classList.add('active');
+                }
+            }
+
+            changeNav();
+            window.addEventListener('scroll', changeNav);
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 70,
+                            behavior: 'smooth'
+                        });
+                        if (mobileMenu.classList.contains('hidden') === false) {
+                           mobileMenu.classList.add('hidden');
+                        }
+                    }
+                });
+            });
+
+            // Stepper Logic
+            const steps = {
+                1: {
+                    title: "步驟一：內容獲取 (RSS Feed)",
+                    content: "自動化的第一步是找到穩定的內容來源。我們使用 RSS Feed 來自動化地從目標網站獲取最新內容。這確保了我們的 AI 總是有新鮮的材料可以處理。",
+                    videoTime: "0:26"
+                },
+                2: {
+                    title: "步驟二：網頁內容智慧擷取",
+                    content: "取得 RSS 連結後，AI 會自動訪問網頁並精準抓取我們需要的核心資訊，去除廣告、導覽列等無關內容，將最純淨的原始材料餵給下一步的生成模型。",
+                    videoTime: "1:23"
+                },
+                3: {
+                    title: "步驟三：AI 反思流程核心 (魔法所在！)",
+                    content: "這是提升品質的關鍵！AI 會進行三輪迭代：<br>1. <strong>生成初稿：</strong> 根據指令產出第一版內容。<br>2. <strong>自我審查：</strong> AI 會扮演批判者的角色，評估初稿的優缺點。<br>3. <strong>優化改進：</strong> 根據審查意見，AI 會重寫並優化內容，產出最終高品質腳本。",
+                    videoTime: "1:47"
+                },
+                4: {
+                    title: "步驟四：AI 腳本自動歸檔",
+                    content: "當高品質的腳本生成後，不能就此結束。流程會將完成的內容自動傳回 AIWize 的「文件模組」進行儲存與歸檔，方便後續的查找、管理與再利用。",
+                    videoTime: "3:05"
+                }
+            };
+
+            const stepperContainer = document.getElementById('stepper');
+            const stepContentContainer = document.getElementById('step-content');
+            let currentStep = 1;
+
+            function updateStepContent(step) {
+                currentStep = step;
+                const stepData = steps[step];
+                stepContentContainer.innerHTML = `
+                    <h3 class="text-xl font-bold mb-3">${stepData.title}</h3>
+                    <p class="text-gray-700">${stepData.content}</p>
+                    <div class="mt-4 text-sm text-blue-600 font-semibold">
+                        <a href="#" class="hover:underline">相關影片片段：${stepData.videoTime}</a>
+                    </div>
+                `;
+                
+                stepperContainer.querySelectorAll('.step').forEach(s => {
+                    s.classList.remove('active');
+                });
+                stepperContainer.querySelector(`.step[data-step="${step}"]`).classList.add('active');
+
+                // Update chart
+                processChart.options.plugins.tooltip.enabled = false;
+                processChart.data.datasets[0].backgroundColor = processChart.data.datasets[0].backgroundColor.map((color, i) => i === (step - 1) ? '#0056b3' : originalColors[i]);
+                processChart.update();
+            }
+
+            stepperContainer.addEventListener('click', e => {
+                const stepElement = e.target.closest('.step');
+                if (stepElement) {
+                    const stepNumber = parseInt(stepElement.dataset.step);
+                    updateStepContent(stepNumber);
+                }
+            });
+
+            // Chart.js
+            const ctx = document.getElementById('processChart').getContext('2d');
+            const originalColors = ['#AECBFA', '#82A9F7', '#5888F2', '#2E67EC'];
+            const processChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['內容獲取', '資料抓取', 'AI 反思', '自動歸檔'],
+                    datasets: [{
+                        label: '流程佔比',
+                        data: [15, 15, 50, 20],
+                        backgroundColor: originalColors,
+                        borderColor: '#FFFFFF',
+                        borderWidth: 3,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        },
+                        tooltip: {
+                           enabled: true
+                        }
+                    },
+                    onClick: (event, elements) => {
+                        if (elements.length > 0) {
+                            const chartElement = elements[0];
+                            const stepIndex = chartElement.index + 1;
+                            updateStepContent(stepIndex);
+                        }
+                    }
+                }
+            });
+
+            // FAQ Logic
+            const faqData = [
+                {
+                    question: "AI 的「反思」具體是如何運作的？",
+                    answer: "影片中會詳細示範，簡而言之，是透過多輪的提示詞指令，讓 AI 先生成內容，再對其進行自我評估、指出缺點，然後根據這些缺點進行改進和優化，從而提升最終輸出品質。"
+                },
+                {
+                    question: "這個流程對於 AI 的提示詞要求高嗎？",
+                    answer: "影片中會教你如何撰寫反思型 AI Prompt。雖然會比一般提示詞稍複雜，但一旦掌握核心邏輯，就能穩定產出高品質內容。"
+                },
+                {
+                    question: "如果我想優化的內容不是影片腳本，這個流程也適用嗎？",
+                    answer: "完全適用！ 影片中強調，這套反思流程是一個通用設計，能應用於任何需要 AI 生成內容並進行品質優化的場景。"
+                },
+                {
+                    question: "學習這支影片需要具備哪些背景知識？",
+                    answer: "建議對 AI 工具（如 AIWize, ChatGPT 等）有基礎認識會更有幫助，但影片會從頭示範，即使是初學者也能跟隨學習。"
+                }
+            ];
+
+            const faqContainer = document.getElementById('faq-container');
+            faqData.forEach((item, index) => {
+                const faqItem = document.createElement('div');
+                faqItem.className = 'faq-item py-4';
+                faqItem.innerHTML = `
+                    <div class="faq-question flex justify-between items-center">
+                        <h4 class="text-lg font-semibold">${item.question}</h4>
+                        <span class="transform transition-transform duration-300 text-blue-500 font-bold text-2xl">-</span>
+                    </div>
+                    <div class="faq-answer pt-0">
+                        <p class="text-gray-600 mt-2">${item.answer}</p>
+                    </div>
+                `;
+                faqContainer.appendChild(faqItem);
+            });
+            
+            faqContainer.addEventListener('click', e => {
+                const questionHeader = e.target.closest('.faq-question');
+                if (questionHeader) {
+                    const answer = questionHeader.nextElementSibling;
+                    const icon = questionHeader.querySelector('span');
+                    
+                    if (answer.style.maxHeight && answer.style.maxHeight !== '0px') {
+                        answer.style.maxHeight = '0px';
+                        answer.style.paddingTop = '0';
+                        icon.style.transform = 'rotate(0deg)';
+                        icon.textContent = '+';
+                    } else {
+                        document.querySelectorAll('.faq-answer').forEach(ans => {
+                            ans.style.maxHeight = '0px';
+                            ans.style.paddingTop = '0';
+                            const prevIcon = ans.previousElementSibling.querySelector('span');
+                            prevIcon.style.transform = 'rotate(0deg)';
+                            prevIcon.textContent = '+';
+                        });
+
+                        answer.style.maxHeight = answer.scrollHeight + 20 + 'px';
+                        answer.style.paddingTop = '0.5rem';
+                        icon.style.transform = 'rotate(180deg)';
+                        icon.textContent = '-';
+
+                    }
+                }
+            });
+
+
+            // Initialize first step
+            updateStepContent(1);
+        });
+    </script>
+</body>
+</html>
